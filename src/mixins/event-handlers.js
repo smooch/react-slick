@@ -179,7 +179,7 @@ var EventHandlers = {
     let indexes = [];
 
     if (!this.props.infinite) {
-      max = this.state.slideCount;
+      max = this.state.slideCount - this.props.slidesToShow + 1;
     } else {
       breakPoint = this.props.slidesToShow * -1;
       counter = this.props.slidesToShow * -1;
@@ -215,35 +215,16 @@ var EventHandlers = {
 
     return index;
   },
-  getSlideCount() {
+  getSlideCount(swipeLength) {
     const centerOffset = this.props.centerMode ? this.state.slideWidth * Math.floor(this.props.slidesToShow / 2) : 0;
 
     if (this.props.swipeToSlide) {
       let swipedSlide;
 
       const slickList = ReactDOM.findDOMNode(this.list);
+      const slideWidth = this.state.listWidth / this.props.slidesToShow;
 
-      const slides = slickList.querySelectorAll('.slick-slide');
-
-      Array.from(slides).every((slide) => {
-        if (!this.props.vertical) {
-          if (slide.offsetLeft - centerOffset + (this.getWidth(slide) / 2) > this.state.swipeLeft * -1) {
-            swipedSlide = slide;
-            return false;
-          }
-        } else {
-          if (slide.offsetTop + (this.getHeight(slide) / 2) > this.state.swipeLeft * -1) {
-            swipedSlide = slide;
-            return false;
-          }
-        }
-
-        return true;
-      });
-
-      const slidesTraversed = Math.abs(swipedSlide.dataset.index - this.state.currentSlide) || 1;
-
-      return slidesTraversed;
+      return Math.floor((swipeLength + slideWidth / 2) / slideWidth);
     } else {
       return this.props.slidesToScroll;
     }
@@ -256,7 +237,7 @@ var EventHandlers = {
       return;
     }
     var touchObject = this.state.touchObject;
-    var minSwipe = this.state.listWidth/this.props.touchThreshold;
+    var minSwipe = this.state.listWidth / this.props.slidesToShow / 2;
     var swipeDirection = this.swipeDirection(touchObject);
 
     if (this.props.verticalSwiping) {
@@ -291,14 +272,14 @@ var EventHandlers = {
 
         case 'left':
         case 'down':
-          newSlide = this.state.currentSlide + this.getSlideCount();
+          newSlide = this.state.currentSlide + this.getSlideCount(touchObject.swipeLength);
           slideCount = this.props.swipeToSlide ? this.checkNavigable(newSlide) : newSlide;
           this.state.currentDirection = 0;
           break;
 
         case 'right':
         case 'up':
-          newSlide = this.state.currentSlide - this.getSlideCount();
+          newSlide = this.state.currentSlide - this.getSlideCount(touchObject.swipeLength);
           slideCount = this.props.swipeToSlide ? this.checkNavigable(newSlide) : newSlide;
           this.state.currentDirection = 1;
           break;

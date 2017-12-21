@@ -65,6 +65,16 @@ export var InnerSlider = createReactClass({
     } else {
       window.attachEvent('onresize', this.onWindowResized);
     }
+
+    document.body.addEventListener('mousedown', this.swipeStart);
+    document.body.addEventListener('mousemove', (e) => { this.state.dragging && this.swipeMove(e); });
+    document.body.addEventListener('mouseup', this.swipeEnd);
+    document.body.addEventListener('mouseleave', (e) => { this.state.dragging && this.swipeEnd(e); });
+
+    document.body.addEventListener('touchstart', this.swipeStart);
+    document.body.addEventListener('touchmove', (e) => { this.state.dragging && this.swipeMove(e); });
+    document.body.addEventListener('touchend', this.swipeEnd);
+    document.body.addEventListener('touchcancel', (e) => { this.state.dragging && this.swipeEnd(e); });
   },
   componentWillUnmount: function componentWillUnmount() {
     if (this.animationEndCallback) {
@@ -78,6 +88,16 @@ export var InnerSlider = createReactClass({
     if (this.state.autoPlayTimer) {
       clearInterval(this.state.autoPlayTimer);
     }
+
+    document.body.removeEventListener('mousedown');
+    document.body.removeEventListener('mousemove');
+    document.body.removeEventListener('mouseup');
+    document.body.removeEventListener('mouseleave');
+
+    document.body.removeEventListener('touchstart');
+    document.body.removeEventListener('touchmove');
+    document.body.removeEventListener('touchend');
+    document.body.removeEventListener('touchcancel');
   },
   componentWillReceiveProps: function (nextProps) {
     if (this.props.slickGoTo != nextProps.slickGoTo) {
@@ -223,14 +243,6 @@ export var InnerSlider = createReactClass({
           ref={this.listRefHandler}
           className="slick-list"
           style={listStyle}
-          onMouseDown={this.swipeStart}
-          onMouseMove={this.state.dragging ? this.swipeMove : null}
-          onMouseUp={this.swipeEnd}
-          onMouseLeave={this.state.dragging ? this.swipeEnd : null}
-          onTouchStart={this.swipeStart}
-          onTouchMove={this.state.dragging ? this.swipeMove : null}
-          onTouchEnd={this.swipeEnd}
-          onTouchCancel={this.state.dragging ? this.swipeEnd : null}
           onKeyDown={this.props.accessibility ? this.keyHandler : null}>
           <Track ref={this.trackRefHandler} {...trackProps}>
             {this.props.children}
